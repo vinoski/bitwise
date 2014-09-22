@@ -1,0 +1,9 @@
+{application, bitwise,
+ [
+  {description, "Example NIF code"},
+  {vsn, "1.0"},
+  {modules, []},
+  {registered, []},
+  {applications, [kernel,stdlib]},
+  {env, []}
+ ]}.
