@@ -70,8 +70,6 @@ exor2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     end = offset + max_per_slice;
     if (end > bin.size) end = bin.size;
     i = offset;
-    /* initialize timeslice consumption */
-    enif_consume_timeslice(env, 0);
     while (i < bin.size) {
         gettimeofday(&start, NULL);
         do {
@@ -81,14 +79,21 @@ exor2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         gettimeofday(&stop, NULL);
         /* determine how much of the timeslice was used */
         timersub(&stop, &start, &slice);
-        pct = (int)((slice.tv_sec*1000000+slice.tv_usec)/10000);
+        pct = (int)((slice.tv_sec*1000000+slice.tv_usec)/10);
         total += pct;
+        if (pct > 100) pct = 100;
+        else if (pct == 0) pct = 1;
         if (enif_consume_timeslice(env, pct)) {
             /* the timeslice has been used up, so adjust our max_per_slice byte count based on
              * the processing we've done, then reschedule to run again */
             max_per_slice = i - offset;
-            if (total > 100)
-                max_per_slice -= (int)((max_per_slice*(total-100))/100);
+            if (total > 100) {
+                int m = (int)(total/100);
+                if (m == 1)
+                    max_per_slice -= (unsigned long)(max_per_slice*(total-100)/100);
+                else
+                    max_per_slice = (unsigned long)(max_per_slice/m);
+            }
             newargv[0] = argv[0];
             newargv[1] = argv[1];
             newargv[2] = enif_make_ulong(env, max_per_slice);
