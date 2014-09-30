@@ -25,16 +25,16 @@
 
 %% With a large Bin argument, exor_bad takes far too long for a NIF
 exor_bad(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
-    error({nif_not_loaded, ?MODULE}).
+    erlang:nif_error({nif_not_loaded, ?MODULE}).
 
 %% exor_yield processes Bin in chunks and uses enif_schedule_nif to yield
 %% the scheduler thread between chunks
 exor_yield(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
-    error({nif_not_loaded, ?MODULE}).
+    erlang:nif_error({nif_not_loaded, ?MODULE}).
 
 %% exor_dirty processes Bin on a dirty scheduler
 exor_dirty(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
-    error({nif_not_loaded, ?MODULE}).
+    erlang:nif_error({nif_not_loaded, ?MODULE}).
 
 %% Similar to exor_yield but do the chunking in Erlang
 exor_chunks(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
