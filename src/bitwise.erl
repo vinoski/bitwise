@@ -20,10 +20,12 @@
 -module(bitwise).
 -author('vinoski@ieee.org').
 -export([exor_chunks/2]).
--export([exor_bad/2, exor_yield/2, exor_dirty/2, reds/3]).
+-export([exor/2, exor_bad/2, exor_yield/2, exor_dirty/2, reds/3]).
 -on_load(init/0).
 
-%% With a large Bin argument, exor_bad takes far too long for a NIF
+%% With a large Bin argument, exor/2 and exor_bad take far too long for a NIF
+exor(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
+    erlang:nif_error({nif_not_loaded, ?MODULE}).
 exor_bad(Bin, Byte) when is_binary(Bin), Byte >= 0, Byte < 256 ->
     erlang:nif_error({nif_not_loaded, ?MODULE}).
 

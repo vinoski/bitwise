@@ -31,22 +31,31 @@ resulting values. These variants operate as follows:
   they are not constrained the same way regular scheduler threads are with
   respect to long-running CPU- or I/O-intensive tasks.
 
-*Note: this code was originally presented at Chicago Erlang, 22 Sep
-2014. It's evolved since then, including a fix for the example of how
-`enif_consume_timeslice()` and `enif_schedule_nif()` are used together. In
-the Chicago Erlang presentation, the code presented for this area
-miscalculated timeslice percentages; this has been fixed. The slides have
-been updated to include this fix as well, which means the slides here
-differ from those originally presented.*
+This code was originally presented at Chicago Erlang, 22 Sep
+2014. The code has evolved since that talk, including a fix for the example
+of how `enif_consume_timeslice()` and `enif_schedule_nif()` are used
+together. In the Chicago Erlang presentation, the code presented for this
+area miscalculated timeslice percentages; this has been fixed. The slides
+have been updated to include this fix as well, which means the slides here,
+in the file
+[`vinoski-opt-native-code.pdf`](https://github.com/vinoski/bitwise/blob/master/vinoski-opt-native-code.pdf),
+differ from those originally presented.
+
+This code was also presented at CodeMesh 2014, 5 Nov 2014. The slides for
+that talk, which are in the file
+[`vinoski-schedulers.pdf`](https://github.com/vinoski/bitwise/blob/master/vinoski-schedulers.pdf),
+include more details than those for the Chicago Erlang talk, specifically
+about a possible dirty driver API.
 
 ## Long Scheduling
 
-A useful Erlang feature not shown in the code or the slides is the ability
-to detect when native code spends too much time on a regular scheduler
-thread by calling `erlang:system_monitor/2` with the `{long_schedule,
-Time}` option. For example, the following code can be interactively run in
-an Erlang shell to cause the shell to receive messages when any NIFs
-execute on a regular scheduler thread for 10ms or more:
+A useful Erlang feature not shown in the code or the Chicago Erlang slides,
+but mentioned in the CodeMesh slides, is the ability to detect when native
+code spends too much time on a regular scheduler thread by calling
+`erlang:system_monitor/2` with the `{long_schedule, Time}` option. For
+example, the following code can be interactively run in an Erlang shell to
+cause the shell to receive messages when any NIFs execute on a regular
+scheduler thread for 10ms or more:
 
     1> erlang:system_monitor(self(), [{long_schedule, 10}]).
     undefined
@@ -54,12 +63,14 @@ execute on a regular scheduler thread for 10ms or more:
 If any NIF executions meet or exceed the 10ms limit, the shell will receive
 messages similar to the following:
 
-    2> flush().
+    2> spawn(fun() -> bitwise:exor(LargeBinary, 16#5A) end).
+    <0.39.0>
+    3> flush().
     Shell got {monitor,<0.39.0>,long_schedule,
-                       [{timeout,14},{in,undefined},{out,undefined}]}
+                       [{timeout,6018},{in,undefined},{out,undefined}]}
 
-Here, the `{timeout, 14}` portion of the message shows that a NIF executed
-for 14ms.
+Here, the `{timeout, 6018}` portion of the message shows that
+`bitwise:exor/2` executed for slightly more than 6 seconds.
 
 See the
 [erlang:system_monitor/2 documentation](http://www.erlang.org/doc/man/erlang.html#system_monitor-2)

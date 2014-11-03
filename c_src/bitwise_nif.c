@@ -152,11 +152,12 @@ nifload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 }
 
 /*
- * Note that exor_bad and exor_dirty both run the same C function, but
- * exor_bad runs it on a regular scheduler thread whereas exor_dirty runs
- * it on a dirty CPU scheduler thread
+ * Note that exor, exor_bad, and exor_dirty all run the same C function,
+ * but exor and exor_bad run it on a regular scheduler thread whereas
+ * exor_dirty runs it on a dirty CPU scheduler thread
  */
 static ErlNifFunc funcs[] = {
+    {"exor", 2, exor},
     {"exor_bad", 2, exor},
     {"exor_yield", 2, exor_yield},
     {"exor_dirty", 2, exor, ERL_NIF_DIRTY_JOB_CPU_BOUND},
