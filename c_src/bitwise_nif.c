@@ -151,6 +151,18 @@ nifload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
+static int
+nifupgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
+{
+    *priv_data = enif_open_resource_type(env,
+                                         NULL,
+                                         "bitwise_buf",
+                                         NULL,
+                                         ERL_NIF_RT_TAKEOVER,
+                                         NULL);
+    return 0;
+}
+
 /*
  * Note that exor, exor_bad, and exor_dirty all run the same C function,
  * but exor and exor_bad run it on a regular scheduler thread whereas
@@ -162,4 +174,4 @@ static ErlNifFunc funcs[] = {
     {"exor_yield", 2, exor_yield},
     {"exor_dirty", 2, exor, ERL_NIF_DIRTY_JOB_CPU_BOUND},
 };
-ERL_NIF_INIT(bitwise,funcs,nifload,NULL,NULL,NULL)
+ERL_NIF_INIT(bitwise,funcs,nifload,NULL,nifupgrade,NULL)
